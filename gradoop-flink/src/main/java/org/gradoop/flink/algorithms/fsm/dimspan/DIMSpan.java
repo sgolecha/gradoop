@@ -17,6 +17,7 @@ package org.gradoop.flink.algorithms.fsm.dimspan;
 
 import org.apache.flink.api.common.functions.GroupCombineFunction;
 import org.apache.flink.api.java.DataSet;
+import org.apache.flink.api.java.aggregation.AggregationFunction;
 import org.apache.flink.api.java.aggregation.SumAggregationFunction;
 import org.apache.flink.api.java.operators.AggregateOperator;
 import org.apache.flink.api.java.operators.IterativeDataSet;
@@ -356,10 +357,12 @@ public class DIMSpan {
   protected GroupCombineFunction<WithCount<int[]>, WithCount<int[]>>
   sumPartition() {
 
-    SumAggregationFunction.LongSumAgg[] sum = { new SumAggregationFunction.LongSumAgg() };
+    AggregationFunction<Long>[] sum = new AggregationFunction[1];
+    sum[0] = new SumAggregationFunction
+              .SumAggregationFunctionFactory()
+              .createAggregationFunction(Long.class);
 
     int[] fields = { 1 };
-
     return new AggregateOperator.AggregatingUdf(sum, fields);
   }
 

@@ -28,7 +28,7 @@ import org.gradoop.flink.model.api.epgm.LogicalGraph;
 import org.gradoop.flink.model.impl.functions.epgm.Id;
 
 /**
- * A gradoop operator wrapping {@link org.apache.flink.graph.library.link_analysis.HITS}
+ * A gradoop operator wrapping {@link org.apache.flink.graph.library.linkanalysis.HITS}
  * <p>
  * This algorithm can be configured to terminate either by a limit on the number of iterations, a
  * convergence threshold, or both.
@@ -50,7 +50,7 @@ public class HITS extends GellyAlgorithm<NullValue, NullValue> {
   /**
    * Gelly HITS implementation
    */
-  private org.apache.flink.graph.library.link_analysis.HITS<GradoopId, NullValue, NullValue> hits;
+  private org.apache.flink.graph.library.linkanalysis.HITS<GradoopId, NullValue, NullValue> hits;
 
   /**
    * HITS with fixed number of iterations
@@ -63,7 +63,7 @@ public class HITS extends GellyAlgorithm<NullValue, NullValue> {
     super(new VertexToGellyVertexWithNullValue(), new EdgeToGellyEdgeWithNullValue());
     this.authorityPropertyKey = authorityPropertyKey;
     this.hubPropertyKey = hubPropertyKey;
-    hits = new org.apache.flink.graph.library.link_analysis.HITS<>(iterations, Double.MAX_VALUE);
+    hits = new org.apache.flink.graph.library.linkanalysis.HITS<>(iterations, Double.MAX_VALUE);
   }
 
 
@@ -78,7 +78,7 @@ public class HITS extends GellyAlgorithm<NullValue, NullValue> {
     super(new VertexToGellyVertexWithNullValue(), new EdgeToGellyEdgeWithNullValue());
     this.authorityPropertyKey = authorityPropertyKey;
     this.hubPropertyKey = hubPropertyKey;
-    hits = new org.apache.flink.graph.library.link_analysis.HITS<>(Integer.MAX_VALUE,
+    hits = new org.apache.flink.graph.library.linkanalysis.HITS<>(Integer.MAX_VALUE,
       convergenceThreshold);
   }
 
@@ -96,7 +96,7 @@ public class HITS extends GellyAlgorithm<NullValue, NullValue> {
     this.authorityPropertyKey = authorityPropertyKey;
     this.hubPropertyKey = hubPropertyKey;
     hits =
-      new org.apache.flink.graph.library.link_analysis.HITS<>(maxIterations, convergenceThreshold);
+      new org.apache.flink.graph.library.linkanalysis.HITS<>(maxIterations, convergenceThreshold);
   }
 
 

@@ -16,7 +16,7 @@
 package org.gradoop.flink.algorithms.gelly.pagerank.functions;
 
 import org.apache.flink.api.common.functions.JoinFunction;
-import org.apache.flink.graph.library.link_analysis.PageRank;
+import org.apache.flink.graph.library.linkanalysis.PageRank;
 import org.gradoop.common.model.impl.id.GradoopId;
 import org.gradoop.common.model.impl.pojo.Vertex;
 import org.gradoop.common.model.impl.properties.PropertyValue;

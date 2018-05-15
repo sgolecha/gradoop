@@ -18,6 +18,7 @@ package org.gradoop.flink.algorithms.fsm.transactional.tle;
 import org.apache.flink.api.common.functions.GroupCombineFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.aggregation.SumAggregationFunction;
+import org.apache.flink.api.java.aggregation.AggregationFunction;
 import org.apache.flink.api.java.operators.AggregateOperator;
 import org.gradoop.flink.algorithms.fsm.dimspan.config.DIMSpanConstants;
 import org.gradoop.flink.algorithms.fsm.dimspan.functions.mining.Frequent;
@@ -149,10 +150,12 @@ public abstract class TransactionalFSMBase implements UnaryCollectionToCollectio
   protected GroupCombineFunction<WithCount<TraversalCode<String>>, WithCount<TraversalCode<String>>>
   sumPartition() {
 
-    SumAggregationFunction.LongSumAgg[] sum = { new SumAggregationFunction.LongSumAgg() };
+    AggregationFunction<Long>[] sum = new AggregationFunction[1];
+    sum[0] = new SumAggregationFunction
+            .SumAggregationFunctionFactory()
+            .createAggregationFunction(Long.class);
 
     int[] fields = { 1 };
-
     return new AggregateOperator.AggregatingUdf(sum, fields);
   }
 }

@@ -17,10 +17,12 @@ package org.gradoop.examples.dimspan.data_source;
 
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.java.hadoop.mapred.HadoopInputFormat;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.TextInputFormat;
 import org.gradoop.flink.algorithms.fsm.dimspan.tuples.LabeledGraphStringString;
-import org.gradoop.flink.io.impl.tlf.inputformats.TLFInputFormat;
 import org.gradoop.flink.util.GradoopFlinkConfig;
 
 import java.io.IOException;
@@ -64,9 +66,13 @@ public class DIMSpanTLFSource {
    */
   public DataSet<LabeledGraphStringString> getGraphs() throws IOException {
     ExecutionEnvironment env = getConfig().getExecutionEnvironment();
-    return env
-      .readHadoopFile(new TLFInputFormat(), LongWritable.class, Text.class, getFilePath())
-      .map(new DIMSpanGraphFromText());
+
+    HadoopInputFormat<LongWritable, Text> hadoopInputFormat =
+            new HadoopInputFormat<LongWritable, Text>(
+                    new TextInputFormat(), LongWritable.class, Text.class);
+    TextInputFormat.addInputPath(hadoopInputFormat.getJobConf(), new Path(getFilePath()));
+
+    return env.createInput(hadoopInputFormat).map(new DIMSpanGraphFromText());
   }
 
   // GETTERS AND SETTERS

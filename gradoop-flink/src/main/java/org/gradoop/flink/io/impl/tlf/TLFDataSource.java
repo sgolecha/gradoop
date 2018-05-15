@@ -17,6 +17,8 @@ package org.gradoop.flink.io.impl.tlf;
 
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
+import org.apache.flink.api.java.hadoop.mapred.HadoopInputFormat;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.TextInputFormat;
@@ -27,7 +29,6 @@ import org.gradoop.flink.io.impl.tlf.functions.EdgeLabelDecoder;
 import org.gradoop.flink.io.impl.tlf.functions.GraphTransactionFromText;
 import org.gradoop.flink.io.impl.tlf.functions.TLFFileFormat;
 import org.gradoop.flink.io.impl.tlf.functions.VertexLabelDecoder;
-import org.gradoop.flink.io.impl.tlf.inputformats.TLFInputFormat;
 import org.gradoop.flink.model.api.epgm.GraphCollection;
 import org.gradoop.flink.model.api.epgm.LogicalGraph;
 import org.gradoop.flink.model.impl.operators.combination.ReduceCombination;
@@ -65,19 +66,23 @@ public class TLFDataSource extends TLFBase implements DataSource {
     String tlfEdgeDictionaryPath, GradoopFlinkConfig config) {
     super(tlfPath, tlfVertexDictionaryPath, tlfEdgeDictionaryPath, config);
     ExecutionEnvironment env = config.getExecutionEnvironment();
+
+    HadoopInputFormat<LongWritable, Text> hadoopInputFormat
+            = new HadoopInputFormat<LongWritable, Text>(
+                    new TextInputFormat(), LongWritable.class, Text.class);
     if (hasVertexDictionary()) {
-      setVertexDictionary(env
-        .readHadoopFile(new TextInputFormat(), LongWritable.class, Text
-          .class, getTLFVertexDictionaryPath())
+      TextInputFormat.addInputPath(hadoopInputFormat.getJobConf(),
+              new Path(getTLFVertexDictionaryPath()));
+      setVertexDictionary(env.createInput(hadoopInputFormat)
           .map(new DictionaryEntry())
           .reduceGroup(new Dictionary()));
     }
     if (hasEdgeDictionary()) {
-      setEdgeDictionary(env
-        .readHadoopFile(new TextInputFormat(), LongWritable.class, Text
-          .class, getTLFEdgeDictionaryPath())
-          .map(new DictionaryEntry())
-          .reduceGroup(new Dictionary()));
+      TextInputFormat.addInputPath(hadoopInputFormat.getJobConf(),
+              new Path(getTLFEdgeDictionaryPath()));
+      setEdgeDictionary(env.createInput(hadoopInputFormat)
+              .map(new DictionaryEntry())
+              .reduceGroup(new Dictionary()));
     }
   }
 
@@ -92,9 +97,13 @@ public class TLFDataSource extends TLFBase implements DataSource {
     ExecutionEnvironment env = getConfig().getExecutionEnvironment();
 
     // load tlf graphs from file
-    transactions = env.readHadoopFile(
-      new TLFInputFormat(), LongWritable.class, Text.class, getTLFPath())
-      .map(new GraphTransactionFromText(
+    HadoopInputFormat<LongWritable, Text> hadoopInputFormat =
+            new HadoopInputFormat<LongWritable, Text>(
+                    new TextInputFormat(), LongWritable.class, Text.class);
+    TextInputFormat.addInputPath(hadoopInputFormat.getJobConf(), new Path(getTLFPath()));
+
+    transactions = env.createInput(hadoopInputFormat)
+        .map(new GraphTransactionFromText(
         getConfig().getGraphHeadFactory(),
         getConfig().getVertexFactory(),
         getConfig().getEdgeFactory()));
